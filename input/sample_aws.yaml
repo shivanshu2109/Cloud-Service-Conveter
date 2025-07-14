@@ -1,0 +1,64 @@
+version: 1
+provider: aws
+resources:
+  - id: app-servers
+    service: ec2
+    resource_type: instance
+    region: us-east-1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 2
+    configuration:
+      instance_type: t3.medium
+      os: linux
+  - id: database
+    service: rds
+    resource_type: database_instance
+    region: us-east-1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 1
+    configuration:
+      engine: rds-postgresql
+      redundancy: multi-az
+      storage: 100GB
+  - id: load-balancer
+    service: elb
+    resource_type: application_load_balancer
+    region: us-east-1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 1
+    configuration:
+      traffic: 1000000 LCU-hours/month
+  - id: object-storage
+    service: s3
+    resource_type: bucket_storage
+    region: us-east-1
+    quantity:
+      unit: GB/month
+      amount: 50
+    configuration:
+      access_tier: standard
+  - id: cdn-distribution
+    service: cloudfront
+    resource_type: distribution_traffic
+    region: us-east-1
+    quantity:
+      unit: GB
+      amount: 100
+    configuration:
+      direction: outbound
+      destination: internet
+  - id: dns-zone
+    service: route53
+    resource_type: hosted_zone
+    region: global
+    quantity:
+      unit: zones
+      amount: 1
+    configuration:
+      public: true

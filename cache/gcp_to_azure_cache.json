@@ -1,0 +1,117 @@
+{
+  "d356be65312773d89b27770ab275abfb77dd526cb90865c63376291cd72fa81c": {
+    "id": "app-servers",
+    "service": "Virtual Machines",
+    "resource_type": "Standard_D3_v2",
+    "region": "eastus",
+    "quantity": {
+      "unit": "hours",
+      "amount": 730,
+      "count": 2
+    },
+    "configuration": {
+      "vmSize": "Standard_D3_v2",
+      "imageReference": {
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "18.04-LTS",
+        "version": "latest"
+      }
+    }
+  },
+  "b36722a8efe1150f4dcc567987b9f80dc3a1ddb4c7211d0f7469545ef8e08304": {
+    "id": "database",
+    "service": "Azure Database for PostgreSQL",
+    "resource_type": "Standard_D2s_v3",
+    "region": "eastus",
+    "quantity": {
+      "unit": "hours",
+      "amount": 730,
+      "count": 1
+    },
+    "configuration": {
+      "engine": "postgresql",
+      "redundancy": "ZoneRedundant",
+      "storage": "100GB"
+    }
+  },
+  "241976dfa6d5e5f77b0d0c00766eae24443f1805e707cf32cd156027b34981c1": {
+    "id": "load-balancer",
+    "service": "Azure Load Balancer",
+    "resource_type": "Public Load Balancer",
+    "region": "East US",
+    "quantity": {
+      "unit": "hours",
+      "amount": 730,
+      "count": 1
+    },
+    "configuration": {
+      "loadBalancingRules": [
+        {
+          "frontendIPConfiguration": {
+            "publicIPAddressResourceId": "-"
+          },
+          "backendAddressPool": {
+            "backendIPConfigurations": "-"
+          },
+          "probe": {
+            "port": 80
+          },
+          "protocol": "Tcp",
+          "frontendPort": 80,
+          "backendPort": 80,
+          "idleTimeoutInMinutes": 4,
+          "enableFloatingIP": false,
+          "disableOutboundSnat": false,
+          "loadDistribution": "Default"
+        }
+      ],
+      "outboundRules": "-",
+      "inboundNatRules": "-",
+      "inboundNatPools": "-"
+    }
+  },
+  "c7f7ae8b683345888965e4a6675e8646504bad683443f307a97a5b0b38b79aa3": {
+    "id": "object-storage",
+    "service": "Blob Storage",
+    "resource_type": "Standard General Purpose v2",
+    "region": "East US",
+    "quantity": {
+      "unit": "GB/month",
+      "amount": 50
+    },
+    "configuration": {
+      "access_tier": "Hot"
+    }
+  },
+  "2a66fc085604490e71bc4642ce8a669e229384ce5be811b42821b42ece6cb880": {
+    "id": "cdn-distribution",
+    "service": "Azure CDN Standard from Verizon",
+    "resource_type": "Microsoft.Cdn/profiles",
+    "region": "Global",
+    "quantity": {
+      "unit": "GB",
+      "amount": 100
+    },
+    "configuration": {
+      "sku": {
+        "name": "Standard_Verizon"
+      },
+      "isHttpAllowed": true,
+      "isHttpsAllowed": true
+    }
+  },
+  "a15b094587929ab2ef15b4375404d96da564fdf79ca9d64ec5976b089c78cba4": {
+    "id": "dns-zone",
+    "service": "DNS",
+    "resource_type": "Zone",
+    "region": "global",
+    "quantity": {
+      "unit": "zones",
+      "amount": 1
+    },
+    "configuration": {
+      "zoneType": "Public"
+    }
+  }
+}

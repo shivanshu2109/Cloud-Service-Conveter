@@ -1,0 +1,101 @@
+version: 1
+provider: gcp
+resources:
+- id: ai-processing
+  service: Cloud Run
+  resource_type: Revision
+  region: us-west2
+  quantity:
+    unit: GB-seconds
+    amount: 15000000
+  configuration:
+    memory: 4096Mi
+    timeout: '-'
+    runtime: '-'
+    architecture: '-'
+    cpu: '2'
+- id: document-storage
+  service: Cloud Storage
+  resource_type: Standard
+  region: europe-west3
+  quantity:
+    unit: GB-month
+    amount: 500
+  configuration:
+    storage_class: Standard
+    access_pattern: '-'
+- id: api-endpoints
+  service: Cloud Endpoints
+  resource_type: Endpoint Service
+  region: us-east2
+  quantity:
+    unit: '-'
+    amount: '-'
+  configuration:
+    auth: JWT
+    caching: '-'
+    timeout: 29000ms
+- id: media-processing
+  service: Transcoder
+  resource_type: videoTranscoding
+  region: northamerica-northeast1
+  quantity:
+    unit: minutes
+    amount: 5000
+  configuration:
+    resolution: 4k
+    codec: hevc
+    acceleration: '-'
+- id: ml-training
+  service: AI Platform
+  resource_type: TrainingJob
+  region: us-east1
+  quantity:
+    unit: hours
+    amount: 720
+  configuration:
+    instance: n1-highmem-96
+    framework: PyTorch
+    distributed: true
+- id: container-orchestration
+  service: Kubernetes Engine
+  resource_type: GKE Node Pool
+  region: europe-west1
+  quantity:
+    unit: hours
+    amount: 1440
+    count: 8
+  configuration:
+    cpu: 4
+    memory: 30
+    platform: '-'
+- id: realtime-messaging
+  service: Cloud IoT Core
+  resource_type: Device Registry
+  region: us-west1
+  quantity:
+    unit: messages
+    amount: 25000000
+  configuration:
+    protocol: mqtt5
+    persistence: 7d
+    max_size: 256KB
+- id: security-monitoring
+  service: securitycommandcenter
+  resource_type: threat_detection
+  region: global
+  quantity: '-'
+  configuration:
+    sources: '-'
+    retention: 90d
+- id: redis-cache
+  service: memorystore
+  resource_type: redis
+  region: asia-northeast1
+  quantity:
+    unit: hours
+    amount: 720
+  configuration:
+    redis_version: '7'
+    memory_size_gb: 150
+    snapshot_schedule: daily

@@ -1,0 +1,64 @@
+version: 1
+provider: gcp
+resources:
+  - id: app-servers
+    service: Compute Engine
+    resource_type: e2-medium
+    region: us-east1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 2
+    configuration:
+      instance_type: e2-medium
+      os: linux
+  - id: database
+    service: Cloud SQL
+    resource_type: db-n1-standard-2
+    region: us-east1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 1
+    configuration:
+      engine: postgresql
+      redundancy: regional
+      storage: 100GB
+  - id: load-balancer
+    service: Cloud Load Balancing
+    resource_type: external_application_load_balancer
+    region: us-east1
+    quantity:
+      unit: hours
+      amount: 730
+      count: 1
+    configuration:
+      traffic: 1000000 LCU-hours/month
+  - id: object-storage
+    service: Cloud Storage
+    resource_type: standard
+    region: us-east1
+    quantity:
+      unit: GB/month
+      amount: 50
+    configuration:
+      access_tier: standard
+  - id: cdn-distribution
+    service: Cloud CDN
+    resource_type: cdn_traffic
+    region: global
+    quantity:
+      unit: GB
+      amount: 100
+    configuration:
+      direction: outbound
+      destination: internet
+  - id: dns-zone
+    service: Cloud DNS
+    resource_type: managed_zone
+    region: global
+    quantity:
+      unit: zones
+      amount: 1
+    configuration:
+      public: true

@@ -1,0 +1,171 @@
+{
+  "ee4a294765f47e499088cc07d1eda70354a50802503901aeda85380d2e5a2501": {
+    "id": "ai-processing",
+    "service": "Azure Functions",
+    "resource_type": "Function App",
+    "region": "West US 2",
+    "quantity": {
+      "unit": "GB-seconds",
+      "amount": 15000000
+    },
+    "configuration": {
+      "memory": "4096MB",
+      "timeout": "900s",
+      "runtime": "Python|3.12",
+      "architecture": "arm64"
+    }
+  },
+  "9fe42e7a27f763876ec18317e04b5f77585f2c0a678ab98b35d396c58660747d": {
+    "id": "document-storage",
+    "service": "Storage",
+    "resource_type": "Blob storage account",
+    "region": "West Europe",
+    "quantity": {
+      "unit": "GB-month",
+      "amount": 500
+    },
+    "configuration": {
+      "access_tier": "Hot",
+      "metrics": "enabled"
+    }
+  },
+  "06f93a199dc6f0f760cc7426a7365b7d887ea7ce718ab9e09ed76c7be020a81c": {
+    "id": "user-database",
+    "service": "cosmos db",
+    "resource_type": "azure cosmos db table",
+    "region": "Southeast Asia",
+    "quantity": {
+      "unit": "RU/s",
+      "amount": 5000
+    },
+    "configuration": {
+      "mode": "provisioned throughput",
+      "encryption": "customer-managed",
+      "backup": {
+        "type": "continuous",
+        "retention_period": 30
+      }
+    }
+  },
+  "76a6906bd9607109351de42c1ddb8c00482ca513dad91a5f78a24b40edee94ec": {
+    "id": "api-endpoints",
+    "service": "API Management",
+    "resource_type": "API",
+    "region": "eastus2",
+    "quantity": {
+      "unit": "calls",
+      "amount": 3000000
+    },
+    "configuration": {
+      "authenticationSettings": {
+        "jwtTokenConfig": {
+          "issuer": "-",
+          "audiences": "-"
+        }
+      },
+      "cacheManagementPolicy": {
+        "cacheRegional": true
+      },
+      "requestTimeout": 29000
+    }
+  },
+  "604faf2c4af6d06d87a456a014156feaa90371253f2b6194a64da3b45358c8e9": {
+    "id": "media-processing",
+    "service": "Media Services",
+    "resource_type": "Media Encoder Standard",
+    "region": "canadacentral",
+    "quantity": {
+      "unit": "minutes",
+      "amount": 5000
+    },
+    "configuration": {
+      "resolution": "4K",
+      "codec": "H265",
+      "acceleration": "-"
+    }
+  },
+  "5304a0b2ba7af49676d50bec2674aa99575ff264d11f4cba1662a2d92aa7954e": {
+    "id": "ml-training",
+    "service": "machine-learning",
+    "resource_type": "job",
+    "region": "eastus",
+    "quantity": {
+      "unit": "hours",
+      "amount": 720
+    },
+    "configuration": {
+      "compute": "Standard_ND96asr_v4",
+      "environment": "pytorch",
+      "distributed": true
+    }
+  },
+  "c56a13ea45227f71c54fb00181801a41fd34b8fb403a87520ca1b3485b1094d7": {
+    "id": "container-orchestration",
+    "service": "Container Instance",
+    "resource_type": "AKS",
+    "region": "West Europe",
+    "quantity": {
+      "unit": "hours",
+      "amount": 1440,
+      "count": 8
+    },
+    "configuration": {
+      "cpu": 4,
+      "memory": 30,
+      "os": "Linux",
+      "nodeImageType": "arm64"
+    }
+  },
+  "728a9a0d7e60feb5e4e0d7a48edbf43f62db5d70a54d4a6aa40990529825638b": {
+    "id": "realtime-messaging",
+    "service": "IoT Hub",
+    "resource_type": "IoT hub",
+    "region": "West US",
+    "quantity": {
+      "unit": "messages",
+      "amount": 25000000
+    },
+    "configuration": {
+      "protocol": "MQTT",
+      "retention_days": 7,
+      "max_message_size_bytes": 262144
+    }
+  },
+  "190185fa8977c727a7e274e87e2d646726f8e963101d3596bffd01754f2c97f9": {
+    "id": "security-monitoring",
+    "service": "Azure Defender",
+    "resource_type": "Advanced Threat Protection",
+    "region": "global",
+    "quantity": {
+      "unit": "GB",
+      "amount": 1000
+    },
+    "configuration": {
+      "dataSources": [
+        "AuditLogs",
+        "DNSAnalytics",
+        "NetworkAnalytics"
+      ],
+      "dataRetention": "P90D"
+    }
+  },
+  "9947d6368d960c30c1930818dc2f2669cfd9cf075b793ccdb8b203eab907c42e": {
+    "id": "redis-cache",
+    "service": "Azure Cache for Redis",
+    "resource_type": "Redis Cache",
+    "region": "East Asia",
+    "quantity": {
+      "unit": "hours",
+      "amount": 720
+    },
+    "configuration": {
+      "sku": "Premium",
+      "redis_version": "6",
+      "shard_count": 3,
+      "vm_size": "P4",
+      "data_persistence": true,
+      "backup_frequency": 24,
+      "backup_max_snapshots": 1
+    }
+  }
+}

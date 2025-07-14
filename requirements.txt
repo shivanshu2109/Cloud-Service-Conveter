@@ -1,0 +1,10 @@
+openai
+pyyaml
+python-dotenv
+python-dotenv
+google-generativeai
+pyyaml
+streamlit
+boto3
+PyYAML
+python-dotenv
