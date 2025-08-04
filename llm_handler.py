@@ -3,7 +3,41 @@ import json
 from hashlib import sha256
 import boto3
 from botocore.exceptions import ClientError
-from utils import load_cache, save_cache, get_cache_key
+import yaml
+
+# Cache operations
+
+def load_cache(path):
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return {}
+
+
+def save_cache(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def get_cache_key(service_block):
+    raw = json.dumps(service_block, sort_keys=True)
+    return sha256(raw.encode()).hexdigest()
+
+# YAML operations
+
+def load_yaml(path):
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+
+def save_yaml(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
+        yaml.dump(data, f, indent=2, sort_keys=False)
 
 # --- Load Configuration ---
 with open('config.json', 'r') as f:
@@ -11,7 +45,6 @@ with open('config.json', 'r') as f:
 
 AWS_REGION = os.getenv("AWS_DEFAULT_REGION", config.get("aws_region"))
 CACHE_DIR = config.get("cache_dir")
-# --- NEW: Load both system and user prompts ---
 SYSTEM_PROMPT = config.get("system_prompt")
 USER_PROMPT_TEMPLATE = config.get("user_prompt_template")
 
@@ -19,14 +52,13 @@ try:
     bedrock_client = boto3.client(service_name="bedrock-runtime", region_name=AWS_REGION)
     os.makedirs(CACHE_DIR, exist_ok=True)
 except Exception as e:
-    print(f"❌ Error creating Bedrock client: {e}")
+    print(f"Error creating Bedrock client: {e}")
     bedrock_client = None
 
-# --- LLM Query Function (Updated to use the 'converse' API) ---
+# --- LLM Query Function ---
 def query_llm(service_block, source_cloud, target_cloud, model_info):
-    model_id = model_info['arn'] # Use ARN for provisioned, ID for on-demand
+    model_id = model_info['arn']
     
-    # Create the user-specific part of the prompt
     user_prompt = USER_PROMPT_TEMPLATE.format(
         source_cloud=source_cloud.upper(),
         target_cloud=target_cloud.upper(),
@@ -34,30 +66,18 @@ def query_llm(service_block, source_cloud, target_cloud, model_info):
     )
 
     try:
-        # Use the more robust 'converse' API
         response = bedrock_client.converse(
             modelId=model_id,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [{"text": user_prompt}],
-                }
-            ],
-            system=[
-                {
-                    "text": SYSTEM_PROMPT,
-                }
-            ],
+            messages=[{"role": "user", "content": [{"text": user_prompt}]}],
+            system=[{"text": SYSTEM_PROMPT}],
             inferenceConfig={"maxTokens": 4096}
         )
         
-        # Parse the response structure from the 'converse' API
         json_string = response['output']['message']['content'][0]['text']
         
         if not json_string:
              return {"error": "AI returned an empty response."}
 
-        # Robustly find and extract the JSON object from the response string
         start_index = json_string.find('{')
         end_index = json_string.rfind('}')
         if start_index != -1 and end_index != -1:
@@ -65,19 +85,10 @@ def query_llm(service_block, source_cloud, target_cloud, model_info):
         else:
             return {"error": "No JSON object found in response"}
 
-        # --- THIS IS THE FIX: Add debugging for JSON parsing errors ---
-        try:
-            return json.loads(json_string)
-        except json.JSONDecodeError as e:
-            print("❌ LLM Error: AI did not return a valid JSON object.")
-            print("\n--- PROBLEMATIC STRING FROM LLM ---")
-            print(json_string)
-            print("--- END OF PROBLEMATIC STRING ---\n")
-            return {"error": f"Invalid JSON from AI: {e}"}
-        # --- END OF FIX ---
+        return json.loads(json_string)
 
-    except ClientError as e:
-        return {"error": f"Bedrock API Error: {e}"}
+    except (ClientError, json.JSONDecodeError) as e:
+        return {"error": f"API or JSON parsing error: {e}"}
 
 # --- Main Translator Function ---
 def get_translation(service_block, source_cloud, target_cloud, model_info):
@@ -92,12 +103,11 @@ def get_translation(service_block, source_cloud, target_cloud, model_info):
     key = get_cache_key(service_block)
 
     if key in cache:
-        print(f"✅ Cache hit for: {service_block.get('id')} using model with ARN: {model_id}")
         return cache[key]
 
-    print(f"⚠️  Cache miss → Querying Bedrock for: {service_block.get('id')} using model with ARN: {model_id}")
     result_dict = query_llm(service_block, source_cloud, target_cloud, model_info)
     
+    # We only cache the initial translation. The corrected version will be cached by the UI.
     if "error" not in result_dict:
         cache[key] = result_dict
         save_cache(cache_path, cache)
