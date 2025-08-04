@@ -37,7 +37,7 @@ def main():
     }
 
     save_yaml(args.output, output)
-    print(f"✅ Conversion complete. Output saved to {args.output}")
+    print(f"Conversion complete. Output saved to {args.output}")
 
 if __name__ == "__main__":
     main()
