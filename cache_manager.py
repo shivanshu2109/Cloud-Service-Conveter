@@ -114,25 +114,34 @@ class CacheManager:
     def store_validation_acceptance(self, cache_key: str, accepted_translation: Dict[str, Any],
                                   original_translation: Dict[str, Any]):
         """Store accepted validation suggestion and update main cache."""
-        # This is similar to user edit but marks it as validation acceptance
-        validation_entry = {
-            "translation": accepted_translation,
-            "original_translation": original_translation,
-            "validation_accepted_timestamp": datetime.utcnow().isoformat(),
-            "version": "1.0"
-        }
+        # Load existing cache entry to preserve metadata
+        existing_entry = self._load_cache_entry(cache_key, "translations")
+        if existing_entry:
+            # Preserve all existing metadata but update translation
+            validation_entry = existing_entry.copy()
+            validation_entry.update({
+                "translation": accepted_translation,
+                "original_translation": original_translation,
+                "validation_accepted_timestamp": datetime.utcnow().isoformat(),
+                "validation_accepted": True,
+                "last_accessed": datetime.utcnow().isoformat()
+            })
+        else:
+            # Create new entry if none exists
+            validation_entry = {
+                "translation": accepted_translation,
+                "original_translation": original_translation,
+                "validation_accepted_timestamp": datetime.utcnow().isoformat(),
+                "validation_accepted": True,
+                "timestamp": datetime.utcnow().isoformat(),
+                "version": "1.0"
+            }
         
-        self._save_cache_entry(cache_key, validation_entry, "edits")
-        self._update_main_cache(cache_key, validation_entry)  # Update main cache with validation acceptance
+        # Update the main cache directly with the corrected translation
+        self.update_cache(cache_key, validation_entry)
         
-        # Update metadata to track the validation acceptance
-        metadata = self._load_cache_entry(cache_key, "metadata") or {}
-        metadata.update({
-            "validation_accepted": True,
-            "validation_accepted_timestamp": datetime.utcnow().isoformat(),
-            "last_accessed": datetime.utcnow().isoformat()
-        })
-        self._save_cache_entry(cache_key, metadata, "metadata")
+        print(f"✅ Cache updated with validation acceptance for key: {cache_key[:16]}...")
+        print(f"   Corrected translation ID: {accepted_translation.get('id', 'Unknown')}")
     
     def update_access_count(self, cache_key: str):
         """Update access count and timestamp for cache analytics."""
