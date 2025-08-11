@@ -140,7 +140,7 @@ class CacheManager:
         # Update the main cache directly with the corrected translation
         self.update_cache(cache_key, validation_entry)
         
-        print(f"✅ Cache updated with validation acceptance for key: {cache_key[:16]}...")
+        print(f"Cache updated with validation acceptance for key: {cache_key[:16]}...")
         print(f"   Corrected translation ID: {accepted_translation.get('id', 'Unknown')}")
     
     def update_access_count(self, cache_key: str):
