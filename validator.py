@@ -10,7 +10,7 @@ class ValidationHandler:
     def check_yaml_hierarchy_preservation(self, source_config, translated_config):
         """
         Ensures the translated YAML maintains the original structure and hierarchy.
-        Enhanced to focus on structural integrity validation.
+        Enhanced to focus on structural integrity validation and quantity validation.
         """
         issues = []
         
@@ -19,7 +19,7 @@ class ValidationHandler:
             if key not in translated_config:
                 issues.append(f"STRUCTURAL ERROR: Required key '{key}' is missing from translated configuration.")
         
-        # Validate service and resource_type conversion
+        # Validate service and resource_type conversion (only flag if identical to source in same cloud context)
         if 'service' in source_config and 'service' in translated_config:
             if translated_config['service'] == source_config['service']:
                 issues.append(f"SERVICE ERROR: Service name '{translated_config['service']}' was not converted from source cloud format.")
@@ -27,6 +27,9 @@ class ValidationHandler:
         if 'resource_type' in source_config and 'resource_type' in translated_config:
             if translated_config['resource_type'] == source_config['resource_type']:
                 issues.append(f"RESOURCE ERROR: Resource type '{translated_config['resource_type']}' was not converted from source cloud format.")
+        
+        # CRITICAL: Validate quantity preservation
+        self._validate_quantity_consistency(source_config, translated_config, issues)
         
         # Check for extra keys that weren't in the original
         source_keys = set(source_config.keys())
@@ -75,6 +78,70 @@ class ValidationHandler:
                 # Recursively check nested configurations
                 if isinstance(source_value, dict) and isinstance(translated_value, dict):
                     self._validate_configuration_structure(source_value, translated_value, issues)
+    
+    def _validate_quantity_consistency(self, source_config, translated_config, issues):
+        """
+        Validates that quantity information is properly preserved between source and translated configurations.
+        This is critical for cost estimation and resource planning.
+        """
+        # Check if quantity exists in both configurations
+        if 'quantity' not in source_config and 'quantity' not in translated_config:
+            return  # Both missing - not applicable
+        
+        if 'quantity' in source_config and 'quantity' not in translated_config:
+            issues.append("QUANTITY ERROR: Quantity information is missing from translated configuration.")
+            return
+        
+        if 'quantity' not in source_config and 'quantity' in translated_config:
+            issues.append("QUANTITY WARNING: Quantity information added in translation (not present in source).")
+            return
+        
+        source_quantity = source_config['quantity']
+        translated_quantity = translated_config['quantity']
+        
+        # Handle different quantity formats
+        if isinstance(source_quantity, dict) and isinstance(translated_quantity, dict):
+            # Both are dictionaries - check amount field specifically
+            if 'amount' in source_quantity and 'amount' in translated_quantity:
+                source_amount = source_quantity['amount']
+                translated_amount = translated_quantity['amount']
+                
+                # Convert to numbers for comparison
+                try:
+                    source_num = float(source_amount) if isinstance(source_amount, (str, int, float)) else None
+                    translated_num = float(translated_amount) if isinstance(translated_amount, (str, int, float)) else None
+                    
+                    if source_num is not None and translated_num is not None:
+                        if abs(source_num - translated_num) > 0.001:  # Allow for small floating point differences
+                            percentage_diff = abs((translated_num - source_num) / source_num * 100) if source_num != 0 else 100
+                            if percentage_diff > 5:  # Flag differences greater than 5%
+                                issues.append(f"QUANTITY MISMATCH: Amount changed from {source_amount} to {translated_amount} ({percentage_diff:.1f}% difference). This may indicate manual editing or translation error.")
+                except (ValueError, TypeError):
+                    # Could not convert to numbers - do string comparison
+                    if str(source_amount) != str(translated_amount):
+                        issues.append(f"QUANTITY MISMATCH: Amount changed from '{source_amount}' to '{translated_amount}'. This may indicate manual editing or translation error.")
+            
+            # Check unit consistency
+            if 'unit' in source_quantity and 'unit' in translated_quantity:
+                if source_quantity['unit'] != translated_quantity['unit']:
+                    issues.append(f"QUANTITY UNIT CHANGE: Unit changed from '{source_quantity['unit']}' to '{translated_quantity['unit']}'. Verify if this is appropriate for the target cloud platform.")
+        
+        elif isinstance(source_quantity, (int, float, str)) and isinstance(translated_quantity, (int, float, str)):
+            # Both are simple values - direct comparison
+            try:
+                source_num = float(source_quantity)
+                translated_num = float(translated_quantity)
+                
+                if abs(source_num - translated_num) > 0.001:
+                    percentage_diff = abs((translated_num - source_num) / source_num * 100) if source_num != 0 else 100
+                    if percentage_diff > 5:
+                        issues.append(f"QUANTITY MISMATCH: Quantity changed from {source_quantity} to {translated_quantity} ({percentage_diff:.1f}% difference). This may indicate manual editing or translation error.")
+            except (ValueError, TypeError):
+                if str(source_quantity) != str(translated_quantity):
+                    issues.append(f"QUANTITY MISMATCH: Quantity changed from '{source_quantity}' to '{translated_quantity}'. This may indicate manual editing or translation error.")
+        else:
+            # Different types - flag as potential issue
+            issues.append(f"QUANTITY TYPE MISMATCH: Source quantity type ({type(source_quantity).__name__}) differs from translated type ({type(translated_quantity).__name__}).")
 
     def validate_with_llm(self, source_config, translated_config, source_cloud, target_cloud, model_info):
         """
