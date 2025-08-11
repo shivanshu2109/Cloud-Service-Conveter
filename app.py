@@ -94,34 +94,7 @@ def display_highlighted_changes(original_data: dict, modified_data: dict, change
     original_yaml = yaml.dump(reorder_dict(original_data), indent=2, sort_keys=False)
     modified_yaml = yaml.dump(reorder_dict(modified_data), indent=2, sort_keys=False)
     
-    # Show field-by-field changes
-    st.markdown("### 🔍 Field-Level Changes:")
-    
-    for change in changes.get("modified", []):
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col1:
-            st.markdown(f"**📝 Field:** `{change['path']}`")
-        with col2:
-            st.markdown(f"**🔴 Before:** `{change['old_value']}`")
-        with col3:
-            st.markdown(f"**🟢 After:** `{change['new_value']}`")
-        st.markdown("---")
-    
-    for change in changes.get("added", []):
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            st.markdown(f"**📝 Field:** `{change['path']}`")
-        with col2:
-            st.markdown(f"**🔵 Added:** `{change['value']}`")
-        st.markdown("---")
-    
-    for change in changes.get("removed", []):
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            st.markdown(f"**📝 Field:** `{change['path']}`")
-        with col2:
-            st.markdown(f"**🟠 Removed:** `{change['value']}`")
-        st.markdown("---")
+    # Field-level changes section removed as requested
     
     return original_yaml, modified_yaml
 
