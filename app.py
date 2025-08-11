@@ -201,7 +201,7 @@ def accept_suggestion_callback(item_index, correction, source_cloud, target_clou
     st.session_state.translation_run[item_index]['validation']['changes_applied'] = True
     st.session_state.translation_run[item_index]['validation']['original_translation'] = original_translation
 
-    st.toast(f"✅ Validation accepted! Cache updated for '{resource.get('id')}'!")
+    st.toast(f"Validation accepted! Cache updated for '{resource.get('id')}'!")
     st.success(f"Translation corrected and cached for future use!")
 
 # --- Initialize Enhanced Session State for New UI Features ---
@@ -562,11 +562,11 @@ if st.session_state.translation_run:
                 if preview_changes['modified'] or preview_changes['added'] or preview_changes['removed']:
                     change_preview = []
                     if preview_changes['modified']:
-                        change_preview.append(f"🔄 **{len(preview_changes['modified'])} Modified**")
+                        change_preview.append(f"**{len(preview_changes['modified'])} Modified**")
                     if preview_changes['added']:
-                        change_preview.append(f"➕ **{len(preview_changes['added'])} Added**")
+                        change_preview.append(f"**{len(preview_changes['added'])} Added**")
                     if preview_changes['removed']:
-                        change_preview.append(f"➖ **{len(preview_changes['removed'])} Removed**")
+                        change_preview.append(f"**{len(preview_changes['removed'])} Removed**")
                     
                     st.markdown("**Changes Preview:** " + " | ".join(change_preview))
                 
@@ -601,7 +601,7 @@ if st.session_state.translation_run:
             
             # Show validation changes if suggestion was accepted
             if validation_report.get('changes_applied'):
-                st.subheader("✅ Validation Changes Applied")
+                st.subheader("Validation Changes Applied")
                 st.success("The following changes were made based on AI validation:")
                 
                 # Detect changes between before and after
@@ -627,31 +627,31 @@ if st.session_state.translation_run:
                 display_highlighted_changes(original_translation, translated_resource, changes)
                 
                 # Show full YAML comparison
-                st.markdown("### 📄 Full Configuration Comparison:")
+                st.markdown("### Full Configuration Comparison:")
                 yaml_col1, yaml_col2 = st.columns(2)
                 with yaml_col1:
-                    st.markdown("**🔴 Before Validation:**")
+                    st.markdown("**Before Validation:**")
                     st.code(yaml.dump(reorder_dict(original_translation), indent=2, sort_keys=False), language='yaml')
                     
                 with yaml_col2:
-                    st.markdown("**🟢 After Validation:**")
+                    st.markdown("**After Validation:**")
                     st.code(yaml.dump(reorder_dict(translated_resource), indent=2, sort_keys=False), language='yaml')
                 
                 # Show detailed change list
                 if changes['modified'] or changes['added'] or changes['removed']:
                     with st.expander("View Detailed Changes", expanded=False):
                         if changes['modified']:
-                            st.markdown("**🔄 Modified Fields:**")
+                            st.markdown("**Modified Fields:**")
                             for change in changes['modified']:
                                 st.markdown(f"- **{change['path']}**: `{change['old_value']}` → `{change['new_value']}`")
                         
                         if changes['added']:
-                            st.markdown("**➕ Added Fields:**")
+                            st.markdown("**Added Fields:**")
                             for change in changes['added']:
                                 st.markdown(f"- **{change['path']}**: `{change['value']}`")
                         
                         if changes['removed']:
-                            st.markdown("**➖ Removed Fields:**")
+                            st.markdown("**Removed Fields:**")
                             for change in changes['removed']:
                                 st.markdown(f"- **{change['path']}**: `{change['value']}`")
 
@@ -698,7 +698,7 @@ if st.session_state.translation_run:
                 cache_content = f.read()
             
             st.download_button(
-                label="📥 Download Cache File",
+                label="Download Cache File",
                 data=cache_content,
                 file_name="translations_cache.json",
                 mime="application/json",
