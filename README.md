@@ -190,18 +190,7 @@ The application requires AWS credentials and configuration settings that can be 
 
 See the [Setup Instructions](docs/SETUP.md) for more details on configuring environment variables.
 
-## Performance Metrics
 
-### Achieved Results
-- **Translation Speed**: < 30 seconds for complex configurations
-- **Cache Efficiency**: 80% cost reduction through intelligent caching
-- **Accuracy Rate**: 95% translation accuracy with AI validation
-- **Cost Optimization**: Significant reduction in API usage costs
-
-### Cache Statistics
-- **Hit Rate**: Typically 60-80% for repeated translations
-- **Storage Efficiency**: Compressed JSON storage with metadata
-- **Performance**: Sub-second cache lookups
 
 ## Security & Best Practices
 
