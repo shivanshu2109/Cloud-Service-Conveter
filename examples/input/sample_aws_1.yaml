@@ -1,0 +1,53 @@
+version: 1
+provider: aws
+resources:
+  - id: ai-processing
+    service: lambda
+    resource_type: function
+    region: us-west-2
+    quantity:
+      unit: GB-seconds
+      amount: 15000000
+    configuration:
+      memory: 4096MB
+      timeout: 900s
+      runtime: python3.12
+      architecture: arm64
+
+  - id: data-storage
+    service: s3
+    resource_type: bucket
+    region: us-east-1
+    quantity:
+      unit: GB
+      amount: 500
+    configuration:
+      versioning: enabled
+      encryption: AES256
+      public_access: disabled
+
+  - id: ml-training
+    service: sagemaker
+    resource_type: training-job
+    region: us-west-1
+    quantity:
+      unit: hours
+      amount: 200
+    configuration:
+      instance_type: ml.p3.8xlarge
+      volume_size: 100GB
+      max_runtime: 86400s
+      framework: tensorflow
+      framework_version: 2.12
+
+  - id: api-gateway
+    service: apigateway
+    resource_type: rest-api
+    region: us-east-2
+    quantity:
+      unit: requests
+      amount: 10000000
+    configuration:
+      endpoint_type: EDGE
+      caching: enabled
+      cache_size: 1GB

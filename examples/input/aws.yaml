@@ -1,0 +1,184 @@
+version: 1
+provider: aws
+resources:
+
+  - id: ai-processing
+    service: lambda
+    resource_type: function
+    region: us-west-2
+    quantity:
+      unit: GB-seconds
+      amount: 15000000
+    configuration:
+      memory: 4096MB
+      timeout: 900s
+      runtime: python3.12
+      architecture: arm64
+
+  - id: document-storage
+    service: s3
+    resource_type: intelligent_tiering
+    region: eu-central-1
+    quantity:
+      unit: GB-month
+      amount: 50000
+    configuration:
+      access_pattern: standard
+      lifecycle_policy: 30d to infrequent access
+      monitoring: enabled
+
+  - id: user-database
+    service: dynamodb
+    resource_type: table
+    region: ap-southeast-1
+    quantity:
+      unit: WCU
+      amount: 5000
+    configuration:
+      mode: on-demand
+      encryption: KMS
+      backup: point-in-time
+
+  - id: api-endpoints
+    service: apigateway
+    resource_type: http_api
+    region: us-east-2
+    quantity:
+      unit: requests
+      amount: 3000000
+    configuration:
+      auth: jwt
+      caching: regional
+      timeout: 29000ms
+
+  - id: media-processing
+    service: mediaconvert
+    resource_type: video_transcode
+    region: ca-central-1
+    quantity:
+      unit: minutes
+      amount: 5000
+    configuration:
+      resolution: 4k
+      codec: HEVC
+      acceleration: elastick
+
+  - id: ml-training
+    service: sagemaker
+    resource_type: training_job
+    region: us-east-1
+    quantity:
+      unit: hours
+      amount: 720
+    configuration:
+      instance: ml.g5.12xlarge
+      framework: pytorch
+      distributed: true
+
+  - id: container-orchestration
+    service: ecs
+    resource_type: fargate
+    region: eu-west-1
+    quantity:
+      unit: hours
+      amount: 1440
+      count: 8
+    configuration:
+      cpu: 4096
+      memory: 30GB
+      platform: linux/arm64
+
+  - id: realtime-messaging
+    service: iot
+    resource_type: message_broker
+    region: us-west-1
+    quantity:
+      unit: messages
+      amount: 25000000
+    configuration:
+      protocol: mqtt5
+      persistence: 7d
+      max_size: 256KB
+
+  - id: security-monitoring
+    service: guardduty
+    resource_type: threat_detection
+    region: global
+    quantity:
+      unit: GB
+      amount: 1000
+    configuration:
+      sources: [cloudtrail, dns, vpc]
+      retention: 90d
+
+  - id: redis-cache
+    service: elasticache
+    resource_type: serverless_cache
+    region: ap-northeast-1
+    quantity:
+      unit: hours
+      amount: 720
+    configuration:
+      engine: redis7
+      data_storage: 150GB
+      snapshot: daily
+
+  - id: edge-distribution
+    service: cloudfront
+    resource_type: distribution
+    region: global
+    quantity:
+      unit: requests
+      amount: 10000000
+    configuration:
+      origin: s3
+      caching_policy: optimized
+      https_redirect: true
+
+  - id: data-warehouse
+    service: redshift
+    resource_type: serverless
+    region: us-east-1
+    quantity:
+      unit: RPUs
+      amount: 128
+    configuration:
+      mode: on-demand
+      snapshots: enabled
+      encryption: KMS
+
+  - id: event-streaming
+    service: kinesis
+    resource_type: data_stream
+    region: us-west-2
+    quantity:
+      unit: shard-hours
+      amount: 10000
+    configuration:
+      retention: 48h
+      enhanced_monitoring: true
+      encryption: enabled
+
+  - id: web-app-hosting
+    service: amplify
+    resource_type: app
+    region: us-east-1
+    quantity:
+      unit: build-minutes
+      amount: 2000
+    configuration:
+      branch_auto_deploy: true
+      framework: nextjs
+      custom_domain: true
+
+  - id: fault-detection
+    service: cloudwatch
+    resource_type: alarms
+    region: eu-west-2
+    quantity:
+      unit: alarms
+      amount: 50
+    configuration:
+      metrics: [CPUUtilization, Latency, Throttles]
+      actions_enabled: true
+      notification: sns-topic-ops
