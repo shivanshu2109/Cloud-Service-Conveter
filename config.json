@@ -2,10 +2,6 @@
   "aws_region": "us-east-1",
   "cache_dir": "cache",
   "available_models": {
-    "Claude 3.5 Sonnet": {
-      "arn": "arn:aws:bedrock:us-east-1:824934510220:inference-profile/us.anthropic.claude-3-5-sonnet-20240620-v1:0",
-      "family": "anthropic"
-    },
     "Claude 3 Sonnet": {
       "arn": "arn:aws:bedrock:us-east-1:824934510220:inference-profile/us.anthropic.claude-3-sonnet-20240229-v1:0",
       "family": "anthropic"
